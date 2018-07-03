@@ -23,9 +23,16 @@ public class ConfigProperties extends Properties implements Serializable {
 
 	private ConfigProperties() {
 		try {
-			InputStream globalInputStream = new FileInputStream(
-					System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
-			load(globalInputStream);
+
+			if (System.getenv("CATALINA_HOME") != null) {
+				InputStream globalInputStream = new FileInputStream(
+						System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
+				load(globalInputStream);
+			} else {
+				InputStream globalInputStream = new FileInputStream(
+						"/camunda/webapps/karajan/WEB-INF/classes/config.properties");
+				load(globalInputStream);
+			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			return;
