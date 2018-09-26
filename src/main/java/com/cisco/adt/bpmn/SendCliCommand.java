@@ -14,7 +14,10 @@ public class SendCliCommand implements JavaDelegate {
 	public void execute(DelegateExecution arg0) throws Exception {
 
 		String commandStr = (String) arg0.getVariable("command");
-		boolean configMode = (Boolean) arg0.getVariable("configmode");
+		boolean configMode = false;
+		if (arg0.getVariable("configmode") != null) {
+			configMode = (Boolean) arg0.getVariable("configmode");
+		}
 		String device = (String) arg0.getVariable("device");
 		String contained = "";
 		if (arg0.getVariable("contained") != null) {

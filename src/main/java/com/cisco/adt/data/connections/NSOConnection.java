@@ -39,6 +39,8 @@ public class NSOConnection implements Serializable {
 		String nso_user = "";
 		String nso_pass = "";
 
+		System.out.println(arg0);
+
 		if (arg0 != null) {
 			if (arg0.getVariable("nso_host") != null) {
 				nso_host = (String) arg0.getVariable("nso_host");

@@ -13,7 +13,10 @@ public class NetconfReadConfig implements JavaDelegate {
 	public void execute(DelegateExecution arg0) throws Exception {
 
 		String xpathStr = (String) arg0.getVariable("xpath");
-		boolean includeOperational = (Boolean) arg0.getVariable("oper");
+		boolean includeOperational = false;
+		if (arg0.getVariable("oper") != null) {
+			includeOperational = (Boolean) arg0.getVariable("oper");
+		}
 		String contained = "";
 		if (arg0.getVariable("contained") != null) {
 			contained = (String) arg0.getVariable("contained");

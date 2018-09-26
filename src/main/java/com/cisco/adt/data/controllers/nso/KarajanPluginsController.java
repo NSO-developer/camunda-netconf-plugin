@@ -294,6 +294,7 @@ public class KarajanPluginsController {
 			sess.requestDumbPTY();
 			sess.startShell();
 			OutputStream out = sess.getStdin();
+
 			PrintStream pw = new PrintStream(out);
 			pw.flush();
 
@@ -301,14 +302,25 @@ public class KarajanPluginsController {
 			 * This basic example does not handle stderr, which is sometimes dangerous
 			 * (please read the FAQ).
 			 */
+			boolean interactiveMode = true;
+
 			InputStream stdout = new StreamGobbler(sess.getStdout());
 			Scanner scanner = new Scanner(cmdsToExecute);
 			boolean stop = false;
 			while (!stop & scanner.hasNextLine()) {
 				String command = scanner.nextLine();
 				String[] parts = command.split("\\|\\|");
-				String prompt = parts[0];
-				String answer = parts[1];
+				String prompt = null;
+				String answer = null;
+
+				if (parts.length > 1) {
+					prompt = parts[0];
+					answer = parts[1];
+				} else {
+					interactiveMode = false;
+					answer = command;
+				}
+
 				boolean goon = true;
 				String toRead = "";
 				byte[] tmp = new byte[1024];
@@ -316,30 +328,48 @@ public class KarajanPluginsController {
 				long now = System.currentTimeMillis();
 				while (goon) {
 					if (System.currentTimeMillis() - now > 300000) {
-						result += "Execution BREAK";
+						result += "Execution BREAK - 300s timeout reached";
 						stop = true;
 						break;
 					}
-					while (stdout.available() > 0) {
 
-						int i = stdout.read(tmp, 0, 1024);
-						if (i < 0) {
-							goon = false;
-							break;
+					if (prompt != null) {
+						while (stdout.available() > 0) {
+
+							int i = stdout.read(tmp, 0, 1024);
+							if (i < 0) {
+								goon = false;
+								break;
+							}
+							toRead += new String(tmp, 0, i);
+							// System.out.println(new String(tmp, 0, i));
+							if (toRead.contains(prompt)) {
+								result += toRead + answer;
+								pw.println(answer);
+								pw.flush();
+								goon = false;
+								break;
+							}
 						}
-						toRead += new String(tmp, 0, i);
-						// System.out.println(new String(tmp, 0, i));
-						if (toRead.contains(prompt)) {
-							result += toRead + answer;
-							pw.println(answer);
-							pw.flush();
-							goon = false;
-							break;
-						}
+					} else {
+						pw.println(answer);
+						pw.flush();
+						goon = false;
 					}
 				}
 
 			}
+
+			if (!interactiveMode) {
+				BufferedReader remoteStdoutReader = new BufferedReader(new InputStreamReader(stdout));
+				String line;
+				// sess.waitForCondition(ChannelCondition.STDOUT_DATA, 600000);
+				while ((line = remoteStdoutReader.readLine()) != null) {
+					result += line + "\n";
+				}
+				remoteStdoutReader.close();
+			}
+
 			scanner.close();
 			stdout.close();
 			pw.close();
@@ -348,7 +378,9 @@ public class KarajanPluginsController {
 
 			return result;
 
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			e.printStackTrace(System.err);
 			if (result.isEmpty()) {
 				result = "No output";

@@ -1,7 +1,6 @@
 package com.cisco.adt.data.config;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
@@ -23,19 +22,19 @@ public class ConfigProperties extends Properties implements Serializable {
 
 	private ConfigProperties() {
 		try {
-
-			if (System.getenv("CATALINA_HOME") != null) {
-				InputStream globalInputStream = new FileInputStream(
-						System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
+			InputStream globalInputStream = new FileInputStream(
+					System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
+			System.out.println(System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
+			load(globalInputStream);
+		} catch (Exception ex) {
+			InputStream globalInputStream;
+			try {
+				globalInputStream = new FileInputStream("/camunda/webapps/karajan/WEB-INF/classes/config.properties");
 				load(globalInputStream);
-			} else {
-				InputStream globalInputStream = new FileInputStream(
-						"/camunda/webapps/karajan/WEB-INF/classes/config.properties");
-				load(globalInputStream);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			return;
 		}
 
 	}
