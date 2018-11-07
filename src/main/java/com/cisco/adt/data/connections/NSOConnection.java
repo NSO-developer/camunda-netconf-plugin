@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 
-import com.cisco.adt.data.config.ConfigProperties;
 import com.tailf.jnc.NetconfSession;
 import com.tailf.jnc.SSHConnection;
 import com.tailf.jnc.SSHSession;
@@ -28,18 +27,12 @@ public class NSOConnection implements Serializable {
 
 	}
 
-	public NetconfSession getNetconfSession() {
-		return this.getNetconfSession(null);
-	}
-
 	public NetconfSession getNetconfSession(DelegateExecution arg0) {
 
 		String nso_host = "";
 		String nso_port = "";
 		String nso_user = "";
 		String nso_pass = "";
-
-		System.out.println(arg0);
 
 		if (arg0 != null) {
 			if (arg0.getVariable("nso_host") != null) {
@@ -48,18 +41,12 @@ public class NSOConnection implements Serializable {
 				nso_user = (String) arg0.getVariable("nso_user");
 				nso_pass = (String) arg0.getVariable("nso_pass");
 			}
-
 		}
 
-		if (nso_host.length() == 0) {
-
-			ConfigProperties configProperties = ConfigProperties.getInstance();
-			nso_host = configProperties.getProperty("nso_host");
-			nso_port = configProperties.getProperty("nso_port");
-			nso_user = configProperties.getProperty("nso_user");
-			nso_pass = configProperties.getProperty("nso_pass");
-
+		if ((nso_host == null) || (nso_host.length() == 0)) {
+			return null;
 		}
+
 		try {
 			SSHConnection c = new SSHConnection(nso_host, Integer.parseInt(nso_port));
 
