@@ -80,7 +80,8 @@ public class KarajanPluginsController {
 
 	}
 
-	public static String sendSSHCommands(String host, int port, String user, String pass, String cmdsToExecute) {
+	public static String sendSSHCommands(String host, int port, String user, String pass, String cmdsToExecute,
+			boolean debug) {
 
 		String result = "";
 
@@ -107,7 +108,10 @@ public class KarajanPluginsController {
 				if (result.length() > 0) {
 					result += "\n";
 				}
-				result += ">>>>>>>>>> " + command;
+
+				if (debug) {
+					result += ">>>>>>>>>> " + command;
+				}
 
 				while (true) {
 					String line = br.readLine();
@@ -118,7 +122,9 @@ public class KarajanPluginsController {
 					}
 					result += line;
 				}
-				result += "\n";
+				if (debug) {
+					result += "\n";
+				}
 				br.close();
 				sess.close();
 
@@ -136,7 +142,7 @@ public class KarajanPluginsController {
 	}
 
 	public static String sendSSHConfig(String host, int port, String username, String password, int timeout,
-			String command) throws IOException, AccessDeniedException {
+			String command, boolean debug) throws IOException, AccessDeniedException {
 		Connection connection = new Connection(host, port);
 
 		connection.connect(null, timeout, timeout);
@@ -149,10 +155,10 @@ public class KarajanPluginsController {
 		Session session = connection.openSession();
 		session.startShell();
 
-		return sendSSHConfig(session, timeout, command);
+		return sendSSHConfig(session, timeout, command, debug);
 	}
 
-	public static String sendSSHConfig(Session session, int timeout, String command)
+	public static String sendSSHConfig(Session session, int timeout, String command, boolean debug)
 			throws IOException, AccessDeniedException {
 		OutputStream in = session.getStdin();
 
@@ -277,7 +283,8 @@ public class KarajanPluginsController {
 	 * @param cmdsToExecute
 	 * @return
 	 */
-	public static String sendSSHTerminal(String host, int port, String user, String pass, String cmdsToExecute) {
+	public static String sendSSHTerminal(String host, int port, String user, String pass, String cmdsToExecute,
+			boolean debug) {
 		String result = "";
 
 		try {

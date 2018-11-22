@@ -15,6 +15,10 @@ public class SSHSendCommand implements JavaDelegate {
 		int port = Integer.parseInt((String) arg0.getVariable("port"));
 		String pass = (String) arg0.getVariable("pass");
 		String type = (String) arg0.getVariable("type");
+		boolean debug = false;
+		if (arg0.getVariable("debug") != null) {
+			debug = (Boolean) arg0.getVariable("debug");
+		}
 
 		String command = (String) arg0.getVariable("command");
 
@@ -29,13 +33,13 @@ public class SSHSendCommand implements JavaDelegate {
 			if ((!command.endsWith("exit\n")) || (!command.endsWith("exit"))) {
 				command += "\nexit\n";
 			}
-			resultString = KarajanPluginsController.sendSSHConfig(host, port, user, pass, 10000, command);
+			resultString = KarajanPluginsController.sendSSHConfig(host, port, user, pass, 10000, command, debug);
 			break;
 		case "shell":
-			resultString = KarajanPluginsController.sendSSHCommands(host, port, user, pass, command);
+			resultString = KarajanPluginsController.sendSSHCommands(host, port, user, pass, command, debug);
 			break;
 		case "terminal":
-			resultString = KarajanPluginsController.sendSSHTerminal(host, port, user, pass, command);
+			resultString = KarajanPluginsController.sendSSHTerminal(host, port, user, pass, command, debug);
 			break;
 		}
 
