@@ -1,37 +1,117 @@
 package com.cisco.adt.bpmn;
 
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.JavaDelegate;
+import java.io.IOException;
 
-import com.cisco.adt.data.connections.NSOConnection;
-import com.cisco.adt.data.controllers.nso.NSOController;
-import com.tailf.jnc.NetconfSession;
+import com.cisco.adt.util.Utils;
+import org.apache.ibatis.reflection.ExceptionUtil;
+import org.camunda.bpm.engine.delegate.DelegateExecution;
+import org.camunda.bpm.engine.delegate.Expression;
+import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.cisco.adt.data.ReturnCodes;
+import com.cisco.adt.data.connections.NetconfClient;
+import com.cisco.adt.data.controllers.nso.ANCNetconfController;
+import com.cisco.adt.data.model.bpmn.TaskResult;
+import com.cisco.stbarth.netconf.anc.NetconfException;
+import com.cisco.stbarth.netconf.anc.NetconfException.ProtocolException;
+import com.cisco.stbarth.netconf.anc.NetconfSession;
+import com.cisco.stbarth.netconf.anc.XMLElement;
+import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
+import org.springframework.core.NestedExceptionUtils;
 
 public class NetconfReadConfig implements JavaDelegate {
 
+	private Logger logger = LoggerFactory.getLogger(NetconfReadConfig.class);
+
 	@Override
-	public void execute(DelegateExecution arg0) throws Exception {
+	public void execute(DelegateExecution execution) throws NetconfException {
 
-		String xpathStr = (String) arg0.getVariable("xpath");
+		String reqString = (String) execution.getVariable("xpath");
 		boolean includeOperational = false;
-		if (arg0.getVariable("oper") != null) {
-			includeOperational = (Boolean) arg0.getVariable("oper");
+		if (execution.getVariable("oper") != null) {
+			includeOperational = (Boolean) execution.getVariable("oper");
 		}
-		String contained = "";
-		if (arg0.getVariable("contained") != null) {
-			contained = (String) arg0.getVariable("contained");
-		}
-		NetconfSession netconfSession = NSOConnection.getInstance().getNetconfSession(arg0);
-		String configString = NSOController.readFromNSOAsString(xpathStr, includeOperational, netconfSession);
 
-		if (contained.length() != 0) {
-			boolean testResult = false;
-			if (configString != null) {
-				testResult = configString.contains(contained);
-			}
-			arg0.setVariable("adtResult", testResult);
-		} else {
-			arg0.setVariable("adtResult", configString);
+		String contained = "";
+		if (execution.getVariable("contained") != null) {
+			contained = (String) execution.getVariable("contained");
 		}
+
+		logger.debug("Request: " + reqString + ", Operational: " + includeOperational + ", Test string contained: "
+				+ contained);
+
+		TaskResult taskResult = new TaskResult();
+
+		NetconfSession ncSession = null;
+		XMLElement configData = null;
+		try {
+			ncSession = NetconfClient.getSession(execution);
+			if (ncSession == null) {
+				taskResult.setCode(ReturnCodes.ERROR_NC_SESSION);
+				execution.setVariableLocal("taskResult", taskResult);
+				logger.debug(ReturnCodes.ERROR_NC_SESSION + ", Could not create netconf session");
+				return;
+			} else {
+				if (reqString.trim().startsWith("<")) {
+					configData = ANCNetconfController.getFromXML(ncSession, includeOperational, reqString);
+				} else {
+					configData = ANCNetconfController.getFromXPath(ncSession, includeOperational, reqString);
+				}
+			}
+		} catch (ProtocolException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC_PROTOCOL);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC_PROTOCOL + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} catch (IOException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC_TRANSPORT);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC_TRANSPORT + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} catch (XMLException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC_XML);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC_XML + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} catch (NetconfException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} finally {
+			if (ncSession != null) {
+				try {
+					ncSession.getClient().close();
+				} catch (Exception e) {
+				}
+			}
+		}
+
+		if (configData == null) {
+			logger.debug("Result: " + ReturnCodes.OK + ", Empty result");
+		} else {
+			String configString = configData.toXML();
+			if (contained.length() != 0) {
+				boolean testResult = false;
+				if (configString != null) {
+					testResult = configString.contains(contained);
+				}
+				taskResult.setValue("" + testResult);
+				logger.debug("Result: " + ReturnCodes.OK + ", " + testResult);
+			} else {
+				taskResult.setValue(configString);
+				logger.debug("Result: " + ReturnCodes.OK + ", " + configString);
+			}
+		}
+		taskResult.setCode(ReturnCodes.OK);
+		execution.setVariableLocal("taskResult", taskResult);
+
 	}
+
 }

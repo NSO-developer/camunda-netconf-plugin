@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.nio.file.AccessDeniedException;
+import java.util.Optional;
 import java.util.Scanner;
 
 import javax.xml.bind.JAXBContext;
@@ -16,11 +17,14 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.ValidationEvent;
 import javax.xml.bind.ValidationEventHandler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cisco.adt.data.model.nso.karajan.Actions;
 import com.cisco.adt.data.model.nso.karajan.CliCommand;
 import com.cisco.adt.data.model.nso.karajan.Karajan;
-import com.tailf.jnc.Element;
-import com.tailf.jnc.NetconfSession;
+import com.cisco.stbarth.netconf.anc.NetconfSession;
+import com.cisco.stbarth.netconf.anc.XMLElement;
 
 import ch.ethz.ssh2.ChannelCondition;
 import ch.ethz.ssh2.Connection;
@@ -34,21 +38,22 @@ public class KarajanPluginsController {
 	// private static final String ACCESS_DENIED_MESSAGE = "Access denied";
 	private static final int MAX_OUTPUT_BUFFER_SIZE = 1024 * 1024;
 
-	public static CliCommand sendCliCommand(CliCommand cliCommand, NetconfSession netconfSession) {
+	private static Logger logger = LoggerFactory.getLogger(KarajanPluginsController.class);
+
+	public static CliCommand sendCliCommand(NetconfSession ncSession, CliCommand cliCommand) {
 		Karajan karajan = new Karajan();
 		Actions actions = new Actions();
 		actions.setCliCommand(cliCommand);
 		karajan.setActions(actions);
 
-		Element data = NSOController.sendActionToNSO(karajan, netconfSession);
+		XMLElement data = ANCNetconfController.sendActionToNSO(ncSession, karajan);
 
 		CliCommand returnCli = new CliCommand();
 		returnCli.setSuccess(false);
 
 		try {
-			Element cliReturnNode = data.getChild("karajan");
-
-			String xmlConfig = cliReturnNode.toXMLString();
+			Optional<XMLElement> cliReturnNode = data.getFirst("http://com/cisco/adt","karajan");
+			String xmlConfig = cliReturnNode.get().toXML();
 
 			karajan = new Karajan();
 			if (!xmlConfig.isEmpty()) {
@@ -59,7 +64,7 @@ public class KarajanPluginsController {
 
 						@Override
 						public boolean handleEvent(ValidationEvent event) {
-							System.out.println(event.getMessage());
+							logger.debug(event.getMessage());
 							return true;
 						}
 					});

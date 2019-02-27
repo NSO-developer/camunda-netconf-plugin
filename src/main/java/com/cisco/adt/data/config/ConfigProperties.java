@@ -5,42 +5,31 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("serial")
 
 // Config access Class
 public class ConfigProperties extends Properties implements Serializable {
 
-	private static ConfigProperties instance;
+	private static Logger logger = LoggerFactory.getLogger(ConfigProperties.class);
 
-	public static ConfigProperties getInstance() {
-		if (instance == null) {
-			instance = new ConfigProperties();
-		}
+	public ConfigProperties() {
+		// String rootPath = ConfigProperties.class.getResource("/").getPath();
+		// String filePath = rootPath + "../conf/netconf-profiles.properties";
 
-		return instance;
-	}
+		String filePath = "/app/netconf-profiles.properties";
 
-	private ConfigProperties() {
 		try {
-			InputStream globalInputStream = new FileInputStream(
-					System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
-			System.out.println(System.getenv("CATALINA_HOME") + "/webapps/karajan/WEB-INF/classes/config.properties");
+
+			InputStream globalInputStream = new FileInputStream(filePath);
+			logger.debug("Reading netconf properties from file " + filePath);
 			load(globalInputStream);
 		} catch (Exception ex) {
-			InputStream globalInputStream;
-			try {
-				globalInputStream = new FileInputStream("/camunda/webapps/karajan/WEB-INF/classes/config.properties");
-				load(globalInputStream);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			logger.info("Reading netconf properties from file error" + ex.getMessage());
 		}
 
-	}
-
-	public static void reload() {
-		instance = new ConfigProperties();
 	}
 
 }

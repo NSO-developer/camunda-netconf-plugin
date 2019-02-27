@@ -3,7 +3,9 @@ package com.cisco.adt.bpmn;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 
+import com.cisco.adt.data.ReturnCodes;
 import com.cisco.adt.data.controllers.nso.KarajanPluginsController;
+import com.cisco.adt.data.model.bpmn.TaskResult;
 
 public class SSHSendCommand implements JavaDelegate {
 
@@ -27,6 +29,8 @@ public class SSHSendCommand implements JavaDelegate {
 			contained = (String) arg0.getVariable("contained");
 		}
 
+		TaskResult taskResult = new TaskResult();
+
 		String resultString = "";
 		switch (type) {
 		case "config":
@@ -46,12 +50,16 @@ public class SSHSendCommand implements JavaDelegate {
 		if (contained.length() != 0) {
 			boolean testResult = false;
 			if (resultString != null) {
-				System.out.println(resultString);
 				testResult = resultString.contains(contained);
 			}
-			arg0.setVariable("adtResult", testResult);
+			taskResult.setValue("" + testResult);
 		} else {
-			arg0.setVariable("adtResult", resultString);
+			if (resultString != null) {
+				taskResult.setValue(resultString);
+			}
 		}
+		taskResult.setCode(ReturnCodes.OK);
+		arg0.setVariable("taskResult", taskResult);
+
 	}
 }

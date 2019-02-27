@@ -1,27 +1,36 @@
 package com.cisco.adt.bpmn;
 
+import com.cisco.adt.util.Utils;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.cisco.adt.data.connections.NSOConnection;
+import com.cisco.adt.data.ReturnCodes;
+import com.cisco.adt.data.connections.NetconfClient;
 import com.cisco.adt.data.controllers.nso.KarajanPluginsController;
+import com.cisco.adt.data.model.bpmn.TaskResult;
 import com.cisco.adt.data.model.nso.karajan.CliCommand;
-import com.tailf.jnc.NetconfSession;
+import com.cisco.stbarth.netconf.anc.NetconfException;
+import com.cisco.stbarth.netconf.anc.NetconfException.ProtocolException;
+import com.cisco.stbarth.netconf.anc.NetconfSession;
 
 public class SendCliCommand implements JavaDelegate {
 
-	@Override
-	public void execute(DelegateExecution arg0) throws Exception {
+	private Logger logger = LoggerFactory.getLogger(SendCliCommand.class);
 
-		String commandStr = (String) arg0.getVariable("command");
+	@Override
+	public void execute(DelegateExecution execution) {
+
+		String commandStr = (String) execution.getVariable("command");
 		boolean configMode = false;
-		if (arg0.getVariable("configmode") != null) {
-			configMode = (Boolean) arg0.getVariable("configmode");
+		if (execution.getVariable("configmode") != null) {
+			configMode = (Boolean) execution.getVariable("configmode");
 		}
-		String device = (String) arg0.getVariable("device");
+		String device = (String) execution.getVariable("device");
 		String contained = "";
-		if (arg0.getVariable("contained") != null) {
-			contained = (String) arg0.getVariable("contained");
+		if (execution.getVariable("contained") != null) {
+			contained = (String) execution.getVariable("contained");
 		}
 
 		CliCommand cliCommand = new CliCommand();
@@ -29,19 +38,50 @@ public class SendCliCommand implements JavaDelegate {
 		cliCommand.setDevice(device);
 		cliCommand.setConfigMode(configMode);
 
-		NetconfSession netconfSession = NSOConnection.getInstance().getNetconfSession(arg0);
-		CliCommand cmdResult = KarajanPluginsController.sendCliCommand(cliCommand, netconfSession);
+		TaskResult taskResult = new TaskResult();
+
+		NetconfSession ncSession = null;
+		CliCommand cmdResult = null;
+		try {
+			ncSession = NetconfClient.getSession(execution);
+			if (ncSession == null) {
+				taskResult.setCode(ReturnCodes.ERROR_NC_SESSION);
+				execution.setVariableLocal("taskResult", taskResult);
+				logger.debug(ReturnCodes.ERROR_NC_SESSION + ", Could not create netconf session");
+				return;
+			} else {
+				cmdResult = KarajanPluginsController.sendCliCommand(ncSession, cliCommand);
+			}
+		} catch (ProtocolException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC_PROTOCOL);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC_PROTOCOL + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} finally {
+			try {
+				ncSession.getClient().close();
+			} catch (NetconfException e) {
+			}
+		}
+
+		if (!cmdResult.getSuccess()) {
+			taskResult.setCode(ReturnCodes.ERROR);
+			taskResult.setDetail(cmdResult.getMessage());
+			execution.setVariable("taskResult", taskResult);
+			return;
+		}
+
 		if (contained.length() != 0) {
 			boolean result = false;
 			if (cmdResult.getMessage() != null) {
 				result = cmdResult.getMessage().contains(contained);
 			}
-			arg0.setVariable("adtResult", result);
+			taskResult.setValue("" + result);
+			taskResult.setCode(ReturnCodes.OK);
 		} else {
 			String adtResult = cmdResult.getMessage();
-			if ((adtResult == null) || (adtResult.isEmpty())) {
-				adtResult = "|EMPTY RESULT|";
-			} else {
+			if ((adtResult != null) || (!adtResult.isEmpty())) {
 				if (adtResult.startsWith("\n")) {
 					adtResult = adtResult.substring(adtResult.indexOf("\n") + 1);
 				}
@@ -49,9 +89,17 @@ public class SendCliCommand implements JavaDelegate {
 				if (adtResult.lastIndexOf("\n") > 0) {
 					adtResult = adtResult.substring(0, adtResult.lastIndexOf("\n"));
 				}
+
 			}
-			arg0.setVariable("adtResult", adtResult);
+
+			logger.debug("Result: " + ReturnCodes.OK + ", " + adtResult);
+
+			taskResult.setValue(adtResult);
+			taskResult.setCode(ReturnCodes.OK);
+			execution.setVariable("taskResult", taskResult);
+
 		}
+
 	}
 
 }
