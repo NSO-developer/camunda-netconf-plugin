@@ -24,9 +24,9 @@ public class NetconfSendConfig implements JavaDelegate {
 	@Override
 	public void execute(DelegateExecution execution) {
 
-		logger.debug("netconf send config");
-
 		String configStr = (String) execution.getVariable("configXml");
+
+		logger.debug("Request: " + configStr );
 
 		TaskResult taskResult = new TaskResult();
 

@@ -33,6 +33,9 @@ public class SendCliCommand implements JavaDelegate {
 			contained = (String) execution.getVariable("contained");
 		}
 
+		logger.debug("Request: " + commandStr + ", Device: " + device + ", Config mode: " + configMode + ", Test string contained: "
+				+ contained);
+
 		CliCommand cliCommand = new CliCommand();
 		cliCommand.setCommand(commandStr);
 		cliCommand.setDevice(device);

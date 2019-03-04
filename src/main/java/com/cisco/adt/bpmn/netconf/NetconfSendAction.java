@@ -25,9 +25,11 @@ public class NetconfSendAction implements JavaDelegate {
 	@Override
 	public void execute(DelegateExecution execution) {
 
-		logger.debug("netconf read config");
 
 		String actionXml = (String) execution.getVariable("actionXml");
+
+
+		logger.debug("Request: " + actionXml);
 
 		TaskResult taskResult = new TaskResult();
 
