@@ -1,4 +1,4 @@
-package com.cisco.adt.bpmn;
+package com.cisco.adt.bpmn.netconf;
 
 import java.io.IOException;
 
@@ -15,22 +15,34 @@ import com.cisco.adt.data.model.bpmn.TaskResult;
 import com.cisco.stbarth.netconf.anc.NetconfException;
 import com.cisco.stbarth.netconf.anc.NetconfException.ProtocolException;
 import com.cisco.stbarth.netconf.anc.NetconfSession;
+import com.cisco.stbarth.netconf.anc.XMLElement;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
 
-public class NetconfSendConfig implements JavaDelegate {
+public class NetconfReadConfig implements JavaDelegate {
 
-	private Logger logger = LoggerFactory.getLogger(NetconfSendConfig.class);
+	private Logger logger = LoggerFactory.getLogger(NetconfReadConfig.class);
 
 	@Override
-	public void execute(DelegateExecution execution) {
+	public void execute(DelegateExecution execution) throws NetconfException {
 
-		logger.debug("netconf send config");
+		String reqString = (String) execution.getVariable("xpath");
+		boolean includeOperational = false;
+		if (execution.getVariable("oper") != null) {
+			includeOperational = (Boolean) execution.getVariable("oper");
+		}
 
-		String configStr = (String) execution.getVariable("configXml");
+		String contained = "";
+		if (execution.getVariable("contained") != null) {
+			contained = (String) execution.getVariable("contained");
+		}
+
+		logger.debug("Request: " + reqString + ", Operational: " + includeOperational + ", Test string contained: "
+				+ contained);
 
 		TaskResult taskResult = new TaskResult();
 
 		NetconfSession ncSession = null;
+		XMLElement configData = null;
 		try {
 			ncSession = NetconfClient.getSession(execution);
 			if (ncSession == null) {
@@ -39,7 +51,11 @@ public class NetconfSendConfig implements JavaDelegate {
 				logger.debug(ReturnCodes.ERROR_NC_SESSION + ", Could not create netconf session");
 				return;
 			} else {
-				ANCNetconfController.sendConfig(ncSession, configStr);
+				if (reqString.trim().startsWith("<")) {
+					configData = ANCNetconfController.getFromXML(ncSession, includeOperational, reqString);
+				} else {
+					configData = ANCNetconfController.getFromXPath(ncSession, includeOperational, reqString);
+				}
 			}
 		} catch (ProtocolException e) {
 			taskResult.setCode(ReturnCodes.ERROR_NC_PROTOCOL);
@@ -74,9 +90,24 @@ public class NetconfSendConfig implements JavaDelegate {
 			}
 		}
 
+		if (configData == null) {
+			logger.debug("Result: " + ReturnCodes.OK + ", Empty result");
+		} else {
+			String configString = configData.toXML();
+			if (contained.length() != 0) {
+				boolean testResult = false;
+				if (configString != null) {
+					testResult = configString.contains(contained);
+				}
+				taskResult.setValue("" + testResult);
+				logger.debug("Result: " + ReturnCodes.OK + ", " + testResult);
+			} else {
+				taskResult.setValue(configString);
+				logger.debug("Result: " + ReturnCodes.OK + ", " + configString);
+			}
+		}
 		taskResult.setCode(ReturnCodes.OK);
 		execution.setVariableLocal("taskResult", taskResult);
-		logger.debug(ReturnCodes.OK);
 
 	}
 

@@ -1,4 +1,4 @@
-package com.cisco.adt.bpmn;
+package com.cisco.adt.bpmn.ssh;
 
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;

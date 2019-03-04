@@ -1,4 +1,4 @@
-package com.cisco.adt.bpmn;
+package com.cisco.adt.bpmn.netconf;
 
 import java.io.IOException;
 
