@@ -16,10 +16,10 @@ public class ConfigProperties extends Properties implements Serializable {
 	private static Logger logger = LoggerFactory.getLogger(ConfigProperties.class);
 
 	public ConfigProperties() {
-		// String rootPath = ConfigProperties.class.getResource("/").getPath();
-		// String filePath = rootPath + "../conf/netconf-profiles.properties";
+		String rootPath = ConfigProperties.class.getResource("/").getPath();
+		String filePath = rootPath + "../conf/netconf-profiles.properties";
 
-		String filePath = "/app/netconf-profiles.properties";
+		//String filePath = "/app/netconf-profiles.properties";
 
 		try {
 

@@ -4,11 +4,8 @@ import com.cisco.adt.data.ReturnCodes;
 import com.cisco.adt.data.model.bpmn.TaskResult;
 import com.cisco.adt.util.Utils;
 import com.cisco.stbarth.netconf.anc.NetconfException;
-import com.mashape.unirest.http.HttpResponse;
-import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import com.mashape.unirest.request.GetRequest;
-import com.mashape.unirest.request.HttpRequestWithBody;
+
+import kong.unirest.*;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.slf4j.Logger;
