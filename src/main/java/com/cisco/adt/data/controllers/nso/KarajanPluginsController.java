@@ -319,15 +319,44 @@ public class KarajanPluginsController {
 			InputStream stdout = new StreamGobbler(sess.getStdout());
 			Scanner scanner = new Scanner(cmdsToExecute);
 			boolean stop = false;
+			boolean addToOutput1 = false;
+			boolean addToOutput2 = false;
+			boolean first = true;
+
 			while (!stop & scanner.hasNextLine()) {
 				String command = scanner.nextLine();
+				if (command.trim().isEmpty()) {
+					continue;
+				}
+				if (command.startsWith("////")) {
+					continue;
+				}
 				String[] parts = command.split("\\|\\|");
 				String prompt = null;
 				String answer = null;
 
+
 				if (parts.length > 1) {
 					prompt = parts[0];
 					answer = parts[1];
+					if (parts.length == 3) {
+						if (!first) {
+							addToOutput1 = addToOutput2;
+						}
+						if (!"true".equalsIgnoreCase(parts[2])) {
+							addToOutput2 = false;
+						} else {
+							addToOutput2 = true;
+						}
+						if (first) {
+							addToOutput1 = addToOutput2;
+							first = false;
+						}
+
+					} else {
+						addToOutput1 = addToOutput2;
+						addToOutput2 = false;
+					}
 				} else {
 					interactiveMode = false;
 					answer = command;
@@ -354,15 +383,18 @@ public class KarajanPluginsController {
 								break;
 							}
 							toRead += new String(tmp, 0, i);
+						}
 							// System.out.println(new String(tmp, 0, i));
 							if (toRead.contains(prompt)) {
-								result += toRead + answer;
+								if (addToOutput1) {
+									result += toRead;
+								}
 								pw.println(answer);
 								pw.flush();
 								goon = false;
 								break;
 							}
-						}
+
 					} else {
 						pw.println(answer);
 						pw.flush();

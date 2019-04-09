@@ -27,6 +27,9 @@ public class UnirestHttpRestCall implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) throws NetconfException {
 
+
+        Unirest.config().verifySsl(false);
+
         String reqString = (String) execution.getVariable("reqString");
         String contained = "";
         if (execution.getVariable("contained") != null) {
@@ -125,13 +128,17 @@ public class UnirestHttpRestCall implements JavaDelegate {
                 if (httpResponse.getBody() != null) {
                     testResult = httpResponse.getBody().contains(contained);
                 }
+
+                taskResult.setCode(ReturnCodes.OK);
                 taskResult.setValue("" + testResult);
+                execution.setVariableLocal("taskResult", taskResult);
                 logger.debug("Result: " + ReturnCodes.OK + ", " + testResult);
             } else {
                 taskResult.setCode("HTTP_" + httpResponse.getStatus());
                 taskResult.setDetail(httpResponse.getStatusText());
                 taskResult.setValue(httpResponse.getBody());
                 execution.setVariableLocal("taskResult", taskResult);
+                logger.debug("Result: " + ReturnCodes.OK + ", " + taskResult);
             }
 
         } catch (UnirestException e) {
