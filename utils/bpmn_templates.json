@@ -1,0 +1,538 @@
+[
+	{
+		"name" : "Netconf - Read config/oper",
+		"id" : "com.cisco.adt.karajan.ReadNetconfConfigTask",
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.netconf.NetconfReadConfig",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "XPath or XML filter. In case of XML, multi-filter is possible",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "xpath"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Include operational data",
+						"description" : "Also read operational data",
+						"type" : "Dropdown",
+						"value" : "${false}",
+						"choices" : [ {
+							"name" : "Yes",
+							"value" : "${true}"
+						}, {
+							"name" : "No",
+							"value" : "${false}"
+						} ],
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "oper"
+						}
+					},
+					{
+						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "nc_profile"
+						}
+					},
+					{
+						"label" : "String contained?",
+						"description" : "Check if string is contained in result. Note that the result will be a boolean if this field is not empty",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "contained"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					} 
+				],
+		"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+		}
+	},
+	{
+		"name" : "Netconf - Send config",
+		"id" : "com.cisco.adt.karajan.SendNetconfConfigTask",
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.netconf.NetconfSendConfig",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "Configuration (XML)",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "configXml"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "nc_profile"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to (true/false)",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					} 
+				],
+		"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+		}
+	},
+	{
+		"name" : "Netconf - Send action",
+		"id" : "com.cisco.adt.karajan.SendNetconfActionTask",
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.netconf.NetconfSendAction",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "Action (XML)",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "actionXml"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "nc_profile"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to (xml)",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					} 
+				],
+		"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+			}
+		},
+		{
+			"name" : "NSO - Send CLI Command",
+			"id" : "com.cisco.adt.karajan.SendCLITask",
+			"appliesTo" : [ "bpmn:ServiceTask" ],
+			"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.nso.SendCliCommand",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "Device",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"value" : "${device}",
+							"name" : "device"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Command",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "command"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Config mode",
+						"description" : "Specify if it is a config command or not",
+						"type" : "Dropdown",
+						"value" : "${false}",
+						"choices" : [ {
+							"name" : "Yes",
+							"value" : "${true}"
+						}, {
+							"name" : "No",
+							"value" : "${false}"
+						} ],
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "configmode"
+						}
+					},
+					{
+						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "nc_profile"
+						}
+					},
+					{
+						"label" : "String contained?",
+						"description" : "Check if string is contained in result. Note that the result will be a boolean if this field is not empty",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "contained"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					} ],
+			"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+			}
+	},
+	{
+			"name" : "SSH - Send Command/Config",
+			"id" : "com.cisco.adt.karajan.SendSSHCommandTask",
+			"appliesTo" : [ "bpmn:ServiceTask" ],
+			"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.ssh.SSHSendCommand",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "Host",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "host"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Port",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "port"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},	
+					{
+						"label" : "User",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "user"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Password",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "pass"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},					
+					{
+						"label" : "Command",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "command"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Type of commands",
+						"description" : "Specify if the sent data are shell commands or (device) configuration",
+						"type" : "Dropdown",
+						"value" : "shell",
+						"choices" : [ {
+							"name" : "Shell",
+							"value" : "shell"
+						}, {
+							"name" : "Config",
+							"value" : "config"
+						}, {
+							"name" : "Terminal",
+							"value" : "terminal"
+						} ],
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "type"
+						}
+					},
+					{
+						"label" : "String contained?",
+						"description" : "Check if string is contained in result. Note that the result will be a boolean if this field is not empty",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "contained"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					},
+					{
+						"label" : "Debug mode",
+						"description" : "Will also include each command which was executed and its corresponding output. By default is false - the result will only contaion the output of the commands.",
+						"type" : "Dropdown",
+						"value" : "${false}",
+						"choices" : [ {
+							"name" : "Yes",
+							"value" : "${true}"
+						}, {
+							"name" : "No",
+							"value" : "${false}"
+						} ],
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "debug"
+						}
+					}
+				],
+			"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+			}
+	},
+	{
+		"name" : "HTTP - Rest call (Unirest)",
+		"id" : "com.cisco.adt.karajan.UnirestHttpRestCall",
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+			{
+				"label" : "Implementation Type",
+				"type" : "String",
+				"value" : "com.cisco.adt.bpmn.rest.UnirestHttpRestCall",
+				"editable" : false,
+				"binding" : {
+					"type" : "property",
+					"name" : "camunda:class"
+				}
+			},
+			{
+				"label" : "Methods applied to the request builder (one per line)",
+				"type" : "Text",
+				"binding" : {
+					"type" : "camunda:inputParameter",
+					"name" : "reqString"
+				},
+				"constraints" : {
+					"notEmpty" : true
+				}
+			},
+			{
+				"label" : "String contained?",
+				"description" : "Check if string is contained in result. Note that the result will be a boolean if this field is not empty",
+				"type" : "String",
+				"binding" : {
+					"type" : "camunda:inputParameter",
+					"name" : "contained"
+				}
+			},
+			{
+				"label" : "Result",
+				"description" : "The process variable to which to assign the execution result to",
+				"type" : "String",
+				"value" : "result",
+				"binding" : {
+					"type" : "camunda:outputParameter",
+					"source" : "${ taskResult }"
+				}
+			} ],
+		"entriesVisible" : {
+			"_all" : true,
+			"implementation" : false,
+			"delegate" : false,
+			"resultVariable" : false,
+			"externalTopic" : false,
+			"configureConnectorLink" : false
+		}
+	},
+	{
+		"name" : "Kafka - Post message",
+		"id" : "com.cisco.adt.karajan.KafkaSendMessage",
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+			{
+				"label" : "Implementation Type",
+				"type" : "String",
+				"value" : "com.cisco.adt.bpmn.kafka.KafkaSendMessage",
+				"editable" : false,
+				"binding" : {
+					"type" : "property",
+					"name" : "camunda:class"
+				}
+			},
+			{
+				"label" : "Kafka server address(:port - default 9092)",
+				"type" : "Text",
+				"binding" : {
+					"type" : "camunda:inputParameter",
+					"name" : "kafkaAddress"
+				},
+				"constraints" : {
+					"notEmpty" : true
+				}
+			},
+			{
+				"label" : "Topic",
+				"type" : "Text",
+				"binding" : {
+					"type" : "camunda:inputParameter",
+					"name" : "topic"
+				},
+				"constraints" : {
+					"notEmpty" : true
+				}
+			},
+			{
+				"label" : "Message",
+				"type" : "Text",
+				"binding" : {
+					"type" : "camunda:inputParameter",
+					"name" : "message"
+				},
+				"constraints" : {
+					"notEmpty" : true
+				}
+			},
+			{
+				"label" : "Result",
+				"description" : "The process variable to which to assign the execution result to",
+				"type" : "String",
+				"value" : "result",
+				"binding" : {
+					"type" : "camunda:outputParameter",
+					"source" : "${ taskResult }"
+				}
+			} ],
+		"entriesVisible" : {
+			"_all" : true,
+			"implementation" : false,
+			"delegate" : false,
+			"resultVariable" : false,
+			"externalTopic" : false,
+			"configureConnectorLink" : false
+		}
+	}
+]
