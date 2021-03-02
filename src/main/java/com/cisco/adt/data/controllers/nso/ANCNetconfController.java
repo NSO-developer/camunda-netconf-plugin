@@ -116,7 +116,6 @@ public class ANCNetconfController {
 
 		XMLElement xmlElement = new XMLElement(xml);
 		XMLElement returnElement = ncSession.tailfAction(xmlElement);
-
 		//logger.debug("sendAction result: " + returnElement.toXML());
 
 		return returnElement;

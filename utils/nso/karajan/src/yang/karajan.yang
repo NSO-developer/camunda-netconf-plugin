@@ -1,0 +1,51 @@
+module karajan {
+    namespace "http://com/cisco/adt";
+    prefix karajan;
+
+    import ietf-inet-types { prefix inet; }
+    import tailf-common { prefix tailf; }
+    import tailf-ncs { prefix ncs; }
+
+    container karajan {
+        description "This is an RFS skeleton service";
+        presence true;
+
+        uses ncs:service-data;
+        ncs:servicepoint karajan-servicepoint;
+
+        container actions {
+
+            tailf:action cliCommand {
+                tailf:info "Sends a cli command to the specified device";
+                tailf:actionpoint karajan-cli-command;
+                input {
+                    leaf device {
+                        type leafref {
+                            path "/ncs:devices/ncs:device/ncs:name";
+                        }
+                        mandatory true;
+                    }
+                    leaf command {
+                        type string;
+                        description "CLI command to be sent to the device";
+                        mandatory true;
+                    }
+                    leaf configmode {
+                        type boolean;
+                        description "specifies if it is a config command or not";
+                        default false;
+                    }
+                }
+                output {
+                    leaf success {
+                        type boolean;
+                    }
+                    leaf message {
+                        type string;
+                        description "Result of executing the command (if success) or the error";
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,16 @@
+<ncs-package xmlns="http://tail-f.com/ns/ncs-packages">
+  <name>karajan</name>
+  <package-version>1.0</package-version>
+  <description>Java- and template-based karajan resource facing service</description>
+  <ncs-min-version>4.5</ncs-min-version>
+
+  <!-- It's possible to add more components to the -->
+  <!-- same package, multiple services, data providers etc -->
+
+  <component>
+    <name>RFSSkeleton</name>
+    <callback>
+      <java-class-name>com.cisco.adt.karajanRFS</java-class-name>
+    </callback>
+  </component>
+</ncs-package>
