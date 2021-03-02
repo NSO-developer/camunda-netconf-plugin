@@ -31,11 +31,11 @@ import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
 
+/**
+ * Utility methods used in the different plugins - mainly ssh, sendcli
+ */
 public class KarajanPluginsController {
 
-	// private static final String PROMPT_SYMBOL = "%";
-	// private static final char ERROR_SYMBOL = '^';
-	// private static final String ACCESS_DENIED_MESSAGE = "Access denied";
 	private static final int MAX_OUTPUT_BUFFER_SIZE = 1024 * 1024;
 
 	private static Logger logger = LoggerFactory.getLogger(KarajanPluginsController.class);
@@ -86,7 +86,7 @@ public class KarajanPluginsController {
 	}
 
 	public static String sendSSHCommands(String host, int port, String user, String pass, String cmdsToExecute,
-			boolean debug) {
+										 boolean debug) {
 
 		String result = "";
 
@@ -147,7 +147,7 @@ public class KarajanPluginsController {
 	}
 
 	public static String sendSSHConfig(String host, int port, String username, String password, int timeout,
-			String command, boolean debug) throws IOException, AccessDeniedException {
+									   String command, boolean debug) throws IOException, AccessDeniedException {
 		Connection connection = new Connection(host, port);
 
 		connection.connect(null, timeout, timeout);
@@ -289,7 +289,7 @@ public class KarajanPluginsController {
 	 * @return
 	 */
 	public static String sendSSHTerminal(String host, int port, String user, String pass, String cmdsToExecute,
-			boolean debug) {
+										 boolean debug) {
 		String result = "";
 
 		try {
@@ -310,10 +310,6 @@ public class KarajanPluginsController {
 			PrintStream pw = new PrintStream(out);
 			pw.flush();
 
-			/*
-			 * This basic example does not handle stderr, which is sometimes dangerous
-			 * (please read the FAQ).
-			 */
 			boolean interactiveMode = true;
 
 			InputStream stdout = new StreamGobbler(sess.getStdout());
@@ -384,16 +380,16 @@ public class KarajanPluginsController {
 							}
 							toRead += new String(tmp, 0, i);
 						}
-							// System.out.println(new String(tmp, 0, i));
-							if (toRead.contains(prompt)) {
-								if (addToOutput1) {
-									result += toRead;
-								}
-								pw.println(answer);
-								pw.flush();
-								goon = false;
-								break;
+						// System.out.println(new String(tmp, 0, i));
+						if (toRead.contains(prompt)) {
+							if (addToOutput1) {
+								result += toRead;
 							}
+							pw.println(answer);
+							pw.flush();
+							goon = false;
+							break;
+						}
 
 					} else {
 						pw.println(answer);
@@ -424,7 +420,7 @@ public class KarajanPluginsController {
 
 		} catch (
 
-		Exception e) {
+				Exception e) {
 			e.printStackTrace(System.err);
 			if (result.isEmpty()) {
 				result = "No output";

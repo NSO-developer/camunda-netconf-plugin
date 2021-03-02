@@ -19,6 +19,9 @@ import com.cisco.stbarth.netconf.anc.NetconfSession;
 import com.cisco.stbarth.netconf.anc.XMLElement;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
 
+/**
+ * Utility methods to perform different operation over netconf using the ANC library
+ */
 public class ANCNetconfController {
 
 	private static Logger logger = LoggerFactory.getLogger(ANCNetconfController.class);
@@ -26,7 +29,7 @@ public class ANCNetconfController {
 	public static XMLElement getFromXPath(NetconfSession ncSession, boolean includeOperational, Datastore dataStore,
 			String xpath) throws NetconfException {
 
-		logger.debug("getting config from xpath: " + xpath);
+		//logger.debug("getting config from xpath: " + xpath);
 
 		XMLElement result = null;
 		if (includeOperational) {
@@ -34,7 +37,9 @@ public class ANCNetconfController {
 		} else {
 			result = ncSession.getConfig(dataStore, xpath);
 		}
-		logger.debug("getFromXPath result: " + result.toXML());
+		//logger.debug("getFromXPath result: " + result.toXML());
+
+
 
 		return result;
 
@@ -63,7 +68,7 @@ public class ANCNetconfController {
 	public static XMLElement getFromXML(NetconfSession ncSession, boolean includeOperational, Datastore dataStore,
 			String xml) throws IOException, XMLException, NetconfException {
 
-		logger.debug("XML filter: " + xml);
+		//logger.debug("XML filter: " + xml);
 
 		String rootedXMLString = "<root>" + xml + "</root>";
 
@@ -82,7 +87,7 @@ public class ANCNetconfController {
 		} else {
 			result = ncSession.getConfig(dataStore, xmlElements);
 		}
-		logger.debug("getFromXML result: " + result.toXML());
+		//logger.debug("getFromXML result: " + result.toXML());
 
 		return result;
 
@@ -91,10 +96,11 @@ public class ANCNetconfController {
 	public static void sendConfig(NetconfSession ncSession, Datastore dataStore, String xml)
 			throws IOException, XMLException, NetconfException {
 
-		logger.debug("sending config: " + xml);
+		//logger.debug("sending config: " + xml);
 
 		XMLElement xmlElement = new XMLElement(xml);
 		ncSession.editConfig(dataStore, xmlElement);
+
 
 	}
 
@@ -106,11 +112,12 @@ public class ANCNetconfController {
 	public static XMLElement sendAction(NetconfSession ncSession, String xml)
 			throws IOException, XMLException, NetconfException {
 
-		logger.debug("caling action: " + xml);
+		//logger.debug("caling action: " + xml);
 
 		XMLElement xmlElement = new XMLElement(xml);
 		XMLElement returnElement = ncSession.tailfAction(xmlElement);
-		logger.debug("sendAction result: " + returnElement.toXML());
+
+		//logger.debug("sendAction result: " + returnElement.toXML());
 
 		return returnElement;
 
@@ -119,18 +126,18 @@ public class ANCNetconfController {
 	public static XMLElement callRPC(NetconfSession ncSession, String xml)
 			throws IOException, XMLException, NetconfException {
 
-		logger.debug("caling rpc: " + xml);
+		//logger.debug("caling rpc: " + xml);
 
 		XMLElement xmlElement = new XMLElement(xml);
 		XMLElement returnElement = ncSession.call(xmlElement);
-		logger.debug("callRPC result: " + returnElement.toXML());
+		//logger.debug("callRPC result: " + returnElement.toXML());
 
 		return returnElement;
 	}
 
 	public static XMLElement sendActionToNSO(NetconfSession ncSession, NSOServiceModel action) {
 
-		logger.debug("caling karajan service to send cli through NSO to device");
+		//logger.debug("caling karajan service to send cli through NSO to device");
 
 		StringWriter xml = new StringWriter();
 		try {
@@ -138,7 +145,7 @@ public class ANCNetconfController {
 			Marshaller m = context.createMarshaller();
 			m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			m.marshal(action, xml);
-			logger.debug("sendActionToNSO action:" + xml.toString());
+			//logger.debug("sendActionToNSO action:" + xml.toString());
 
 		} catch (JAXBException e) {
 			logger.debug("sendActionToNSO marshalling error:" + e.getMessage());
@@ -147,7 +154,7 @@ public class ANCNetconfController {
 
 		try {
 			XMLElement element = sendAction(ncSession, xml.toString());
-			logger.debug("sendActionToNSO result:" + element.toXML());
+			//logger.debug("sendActionToNSO result:" + element.toXML());
 			return element;
 		} catch (Exception e) {
 			logger.debug("sendActionToNSO send action error:" + e.getMessage());

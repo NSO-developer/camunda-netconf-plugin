@@ -10,7 +10,9 @@ import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("serial")
 
-// Config access Class
+/**
+ * Reads the netconf-profiles.properties in order to provide profile based authentication
+ */
 public class ConfigProperties extends Properties implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(ConfigProperties.class);

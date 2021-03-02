@@ -18,12 +18,28 @@ import com.cisco.stbarth.netconf.anc.NetconfSession;
 import com.cisco.stbarth.netconf.anc.XMLElement;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
 
+/**
+ *  Plugin for reading configuration/operational data over netconf
+ *  The path being read - config only or including operational - can be specified as an xpath string or as an xml filter
+ *  Will fill a @{@link TaskResult} object back to the workflow process, containing the result code (OK or not), a detail in case of error,
+ *  as well as value containing the result of the read operation in case it was successful.
+ *  If a "contained" string is specified, it the task will check if the string is contained in the result and return true/false
+ */
 public class NetconfReadConfig implements JavaDelegate {
 
 	private Logger logger = LoggerFactory.getLogger(NetconfReadConfig.class);
 
+	/**
+	 * Method called when task is executed by the process
+	 * As input variables:
+	 * - xpath, containing the xpath to be read or the xml filter
+	 * - oper - specifies if operational data should be included or not
+	 * - contained - if present, will check if the string is contained in the result
+	 *
+	 * @param execution
+	 */
 	@Override
-	public void execute(DelegateExecution execution) throws NetconfException {
+	public void execute(DelegateExecution execution) {
 
 		String reqString = (String) execution.getVariable("xpath");
 		boolean includeOperational = false;

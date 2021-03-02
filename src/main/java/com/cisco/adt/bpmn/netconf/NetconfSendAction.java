@@ -18,10 +18,23 @@ import com.cisco.stbarth.netconf.anc.NetconfSession;
 import com.cisco.stbarth.netconf.anc.XMLElement;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
 
+/**
+ *  Plugin for calling an action over netconf
+ *  Action to be called is specified as an xml string
+ *  Will fill a @{@link TaskResult} object back to the workflow process, containing the result code (OK or not), a detail in case of error,
+ *  as well as value containing the result of the read operation in case it was successful.
+ */
 public class NetconfSendAction implements JavaDelegate {
 
 	private Logger logger = LoggerFactory.getLogger(NetconfSendAction.class);
 
+
+	/**
+	 * Method called when task is executed by the process
+	 * As input variables:
+	 * - actionXml containing the action to be called - as xml string
+	 * @param execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
@@ -69,6 +82,12 @@ public class NetconfSendAction implements JavaDelegate {
 			execution.setVariableLocal("taskResult", taskResult);
 			logger.debug(ReturnCodes.ERROR_NC + ", " + Utils.getRootException(e).getMessage());
 			return;
+		} catch (Exception e) {
+			taskResult.setCode(ReturnCodes.ERROR);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC + ", " + Utils.getRootException(e).getMessage());
+			return;
 		} finally {
 			if (ncSession != null) {
 				try {
@@ -87,7 +106,7 @@ public class NetconfSendAction implements JavaDelegate {
 			logger.debug(ReturnCodes.OK + ", " + actionResult.toXML());
 		}
 
-		execution.setVariable("taskResult", taskResult);
+		execution.setVariableLocal("taskResult", taskResult);
 
 	}
 

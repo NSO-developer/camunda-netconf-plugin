@@ -9,6 +9,12 @@ import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Encrypts/decrypts the password saved in the netconf profiles file
+ * Authentication on nso can be done in 2 ways in the plugin: using specific credentials (nc_host, nc_port, nc_user, nc_pass) as input
+ * variables, or using a predefined profile in the netconf-profiles.properties file - in this case the password has to be encrypted with the same
+ * method and key as in this file (an encryption iutility is provided as part of the project)
+ */
 public class PassCrypt {
 
 	private static Logger logger = LoggerFactory.getLogger(PassCrypt.class);

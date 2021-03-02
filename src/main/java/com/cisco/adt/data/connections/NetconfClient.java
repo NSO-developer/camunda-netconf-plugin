@@ -14,6 +14,11 @@ import com.cisco.stbarth.netconf.anc.NetconfSession;
 
 @SuppressWarnings("serial")
 
+/**
+ * Builds a netconf session based on the nc_... input variables or on the netconf profile
+ * Authentication on nso can be done in 2 ways in the plugin: using specific credentials (nc_host, nc_port, nc_user, nc_pass) as input
+ * variables, or using a predefined profile in the netconf-profiles.properties file
+ */
 public class NetconfClient implements Serializable {
 
 	private static Logger logger = LoggerFactory.getLogger(NetconfReadConfig.class);

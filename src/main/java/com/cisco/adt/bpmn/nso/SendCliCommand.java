@@ -15,10 +15,30 @@ import com.cisco.stbarth.netconf.anc.NetconfException;
 import com.cisco.stbarth.netconf.anc.NetconfException.ProtocolException;
 import com.cisco.stbarth.netconf.anc.NetconfSession;
 
+/**
+ * Conveniency plugin to send cli commands to devices over nso. It uses the karajan nso service also part of this project,
+ * which basically provides a generic action to send cli commands to the devices using live status NED feature.
+ * The action will look at the device type and it will send the required cli command usiong the correct NED feature.
+ * Supported for now: cisco-ios, cisco-ios-xr, alu-sr, juniper-junos, redback-se
+ * Note that the same functionality can be reached using the NetconfSendAction plugin, however this plugin hides the differences between
+ * NEDs and offers an unified abstract plugin
+ *  Will fill a @{@link TaskResult} object back to the workflow process, containing the result code (OK or not), a detail in case of error,
+ *  as well as value containing the result of the read operation in case it was successful
+ *  If a "contained" string is specified, it the task will check if the string is contained in the result and return true/false
+ */
 public class SendCliCommand implements JavaDelegate {
 
 	private Logger logger = LoggerFactory.getLogger(SendCliCommand.class);
 
+	/**
+	 * Method called when task is executed by the process
+	 * As input variables:
+	 * - command - string containing the command(s) to be executed
+	 * - configmode - specifies if the command should be executed in config mode (not for all NEDs)
+	 * - device - the device to send the commands to, needs to be onboarded ion NSO
+	 * - contained - if present, will check if the string is contained in the result
+	 * @param execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
@@ -56,6 +76,12 @@ public class SendCliCommand implements JavaDelegate {
 				cmdResult = KarajanPluginsController.sendCliCommand(ncSession, cliCommand);
 			}
 		} catch (ProtocolException e) {
+			taskResult.setCode(ReturnCodes.ERROR_NC_PROTOCOL);
+			taskResult.setDetail(Utils.getRootException(e).getMessage());
+			execution.setVariableLocal("taskResult", taskResult);
+			logger.debug(ReturnCodes.ERROR_NC_PROTOCOL + ", " + Utils.getRootException(e).getMessage());
+			return;
+		} catch (Exception e) {
 			taskResult.setCode(ReturnCodes.ERROR_NC_PROTOCOL);
 			taskResult.setDetail(Utils.getRootException(e).getMessage());
 			execution.setVariableLocal("taskResult", taskResult);
@@ -99,7 +125,7 @@ public class SendCliCommand implements JavaDelegate {
 
 			taskResult.setValue(adtResult);
 			taskResult.setCode(ReturnCodes.OK);
-			execution.setVariable("taskResult", taskResult);
+			execution.setVariableLocal("taskResult", taskResult);
 
 		}
 

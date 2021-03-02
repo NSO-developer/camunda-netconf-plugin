@@ -7,8 +7,38 @@ import com.cisco.adt.data.ReturnCodes;
 import com.cisco.adt.data.controllers.nso.KarajanPluginsController;
 import com.cisco.adt.data.model.bpmn.TaskResult;
 
+/**
+ *  Sample plugin for connecting over ssh and executing commands remotely
+ *  Three workinmg modes are availeble (specified by the "type" input variable):
+ *  - config - send configurations over ssh to any device
+ *  - shell - execute bash command(s) over ssh
+ *  - terminal - use a terminal emulated ssh session to send commands. Able to use in interactive mode,
+ *  where each command can be specified like
+ *  <string to expect>||<command/string to send>||<add to output- true/false>
+ *      like for example:
+ *      sure?||Yes||true
+ *      	will wait until the string sure? is available in terminal, then it will send yes and will make sure that the console strings following
+ *      	that command will be included ion the response
+ *      # ||ls -al||true
+ *      	will wait for the prompt "# ", will then send the list command and add the result to the response
+ *  Be sure, in all of the cases to add an exit command at the end to be able to close the session
+ *
+ *  Will fill a @{@link TaskResult} object back to the workflow process, containing the result code (OK or not), a detail in case of error,
+ *  as well as value containing the result of the read operation in case it was successful.
+ *  If a "contained" string is specified, it the task will check if the string is contained in the result and return true/false
+ */
 public class SSHSendCommand implements JavaDelegate {
 
+	/**
+	 * Method called when task is executed by the process
+	 * As input variables:
+	 * - host, port, user, pass - for connecting to the ssh server/device
+	 * - type - type of session to open (config, shell, terminal)
+	 * - command - commands to be sent (one by line)
+	 * - debug - will show debug information on the output for each executed command
+	 * - contained - if present, will check if the string is contained in the result
+	 * @param execution
+	 */
 	@Override
 	public void execute(DelegateExecution arg0) throws Exception {
 
@@ -59,7 +89,7 @@ public class SSHSendCommand implements JavaDelegate {
 			}
 		}
 		taskResult.setCode(ReturnCodes.OK);
-		arg0.setVariable("taskResult", taskResult);
+		arg0.setVariableLocal("taskResult", taskResult);
 
 	}
 }

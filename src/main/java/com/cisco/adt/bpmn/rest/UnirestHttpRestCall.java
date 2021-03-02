@@ -4,7 +4,6 @@ import com.cisco.adt.data.ReturnCodes;
 import com.cisco.adt.data.model.bpmn.TaskResult;
 import com.cisco.adt.util.Utils;
 import com.cisco.stbarth.netconf.anc.NetconfException;
-
 import kong.unirest.*;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
@@ -18,14 +17,28 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
+/**
+ *  Plugin for performing http rest calls using the Java Unirest library
+ *  Parses the reqString received from the service task and add each line to the corresponding unirest http request.
+ *  reqString should be a list of methods(one by line) applied to the Unirest request:
+ *  post(...)
+ *  header(...)
+ *  body(...)
+ *  Easiest way is to prepare the request using postman and to copy the generated code (Code->Java->Unirest) - only the
+ *  needed methods into the service task
+ */
 public class UnirestHttpRestCall implements JavaDelegate {
 
     private Logger logger = LoggerFactory.getLogger(UnirestHttpRestCall.class);
     private String httpMethod;
     private Object requestObj;
 
+    /**
+     * Method called when task is executed by the process
+     * @param execution
+     */
     @Override
-    public void execute(DelegateExecution execution) throws NetconfException {
+    public void execute(DelegateExecution execution) {
 
 
         Unirest.config().verifySsl(false);
@@ -54,7 +67,7 @@ public class UnirestHttpRestCall implements JavaDelegate {
                 }
                 method = method.trim();
 
-                logger.debug("Method: " + method);
+                //logger.debug("Method: " + method);
 
                 String content = null;
                 try {
@@ -68,8 +81,6 @@ public class UnirestHttpRestCall implements JavaDelegate {
                 if (content.endsWith("\"")) {
                     content = content.substring(0, content.length() - 1);
                 }
-
-                logger.debug("Content: " + content);
 
                 Method unirestMethod = null;
 
@@ -121,7 +132,11 @@ public class UnirestHttpRestCall implements JavaDelegate {
                 httpResponse = ((GetRequest) requestObj).asString();
 
             } else {
-                httpResponse = ((HttpRequestWithBody) requestObj).asString();
+                if (requestObj instanceof HttpRequestWithBody) {
+                    httpResponse = ((HttpRequestWithBody) requestObj).asString();
+                } else {
+                    httpResponse = ((RequestBodyEntity) requestObj).asString();
+                }
             }
             if (contained.length() != 0) {
                 boolean testResult = false;
@@ -149,7 +164,11 @@ public class UnirestHttpRestCall implements JavaDelegate {
 
     }
 
-
+    /**
+     * checks if the method is a get or head method
+     * @param method method to check
+     * @return
+     */
     private boolean isGetMethod(String method) {
         switch (method) {
             case "get":
@@ -159,6 +178,11 @@ public class UnirestHttpRestCall implements JavaDelegate {
         return false;
     }
 
+    /**
+     * checks if the method is a supported http method
+     * @param method method to check
+     * @return
+     */
     private boolean isMethodValid(String method) {
         String[] methods = {"delete", "get", "head", "options", "patch", "post", "put"};
         return Arrays.stream(methods).anyMatch(method::equals);

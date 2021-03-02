@@ -17,10 +17,21 @@ import com.cisco.stbarth.netconf.anc.NetconfException.ProtocolException;
 import com.cisco.stbarth.netconf.anc.NetconfSession;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
 
+/**
+ *  Plugin for sending configuration data over netconf
+ *  The configuzration to be sent is specified as an xml string
+ *  Will fill a @{@link TaskResult} object back to the workflow process, containing the result code (OK or not) and a detail in case of error
+ */
 public class NetconfSendConfig implements JavaDelegate {
 
 	private Logger logger = LoggerFactory.getLogger(NetconfSendConfig.class);
 
+	/**
+	 * Method called when task is executed by the process
+	 * As input variables:
+	 * - configXml containing the configuration to be sent - as xml string
+	 * @param execution
+	 */
 	@Override
 	public void execute(DelegateExecution execution) {
 
