@@ -2,6 +2,7 @@
 	{
 		"name" : "Netconf - Read config/oper",
 		"id" : "com.cisco.adt.karajan.ReadNetconfConfigTask",
+		"version": 1,
 		"appliesTo" : [ "bpmn:ServiceTask" ],
 		"properties" : [
 					{
@@ -15,7 +16,8 @@
 						}
 					},
 					{
-						"label" : "XPath or XML filter. In case of XML, multi-filter is possible",
+						"label" : "XPath or XML filter",
+						"description": "In case of XML, multi-filter is possible",
 						"type" : "Text",
 						"binding" : {
 							"type" : "camunda:inputParameter",
@@ -43,7 +45,8 @@
 						}
 					},
 					{
-						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"label" : "Netconf authentication profile from server",
+						"desciption": "if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables",
 						"type" : "String",
 						"binding" : {
 							"type" : "camunda:inputParameter",
@@ -82,6 +85,7 @@
 	{
 		"name" : "Netconf - Send config",
 		"id" : "com.cisco.adt.karajan.SendNetconfConfigTask",
+		"version": 1,
 		"appliesTo" : [ "bpmn:ServiceTask" ],
 		"properties" : [
 					{
@@ -106,7 +110,8 @@
 						}
 					},
 					{
-						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"label" : "Netconf authentication profile from server",
+						"desciption": "if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables",
 						"type" : "String",
 						"binding" : {
 							"type" : "camunda:inputParameter",
@@ -136,6 +141,7 @@
 	{
 		"name" : "Netconf - Send action",
 		"id" : "com.cisco.adt.karajan.SendNetconfActionTask",
+		"version": 1,		
 		"appliesTo" : [ "bpmn:ServiceTask" ],
 		"properties" : [
 					{
@@ -160,7 +166,8 @@
 						}
 					},
 					{
-						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"label" : "Netconf authentication profile from server",
+						"desciption": "if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables",
 						"type" : "String",
 						"binding" : {
 							"type" : "camunda:inputParameter",
@@ -190,6 +197,7 @@
 		{
 			"name" : "NSO - Send CLI Command",
 			"id" : "com.cisco.adt.karajan.SendCLITask",
+			"version": 1,
 			"appliesTo" : [ "bpmn:ServiceTask" ],
 			"properties" : [
 					{
@@ -243,7 +251,8 @@
 						}
 					},
 					{
-						"label" : "Netconf authentication profile from server (if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables)",
+						"label" : "Netconf authentication profile from server",
+						"desciption": "if not set, nc_host, nc_port, nc_user, nc_pass must be set as execution variables",
 						"type" : "String",
 						"binding" : {
 							"type" : "camunda:inputParameter",
@@ -281,6 +290,7 @@
 	{
 			"name" : "SSH - Send Command/Config",
 			"id" : "com.cisco.adt.karajan.SendSSHCommandTask",
+			"version": 1,
 			"appliesTo" : [ "bpmn:ServiceTask" ],
 			"properties" : [
 					{
@@ -417,6 +427,7 @@
 	{
 		"name" : "HTTP - Rest call (Unirest)",
 		"id" : "com.cisco.adt.karajan.UnirestHttpRestCall",
+		"version": 1,
 		"appliesTo" : [ "bpmn:ServiceTask" ],
 		"properties" : [
 			{
@@ -430,7 +441,8 @@
 				}
 			},
 			{
-				"label" : "Methods applied to the request builder (one per line)",
+				"label" : "Methods applied to the request builder",
+				"description": "one per line",
 				"type" : "Text",
 				"binding" : {
 					"type" : "camunda:inputParameter",
@@ -471,6 +483,7 @@
 	{
 		"name" : "Kafka - Post message",
 		"id" : "com.cisco.adt.karajan.KafkaSendMessage",
+		"version": 1,		
 		"appliesTo" : [ "bpmn:ServiceTask" ],
 		"properties" : [
 			{
@@ -534,5 +547,114 @@
 			"externalTopic" : false,
 			"configureConnectorLink" : false
 		}
-	}
+	},
+	{
+		"name" : "Intersight",
+		"id" : "com.cisco.adt.bpmn.karajan.IntersightTask",
+		"version": 1,		
+		"appliesTo" : [ "bpmn:ServiceTask" ],
+		"properties" : [
+					{
+						"label" : "Implementation Type",
+						"type" : "String",
+						"value" : "com.cisco.adt.bpmn.intersight.IntersightRestCall",
+						"editable" : false,
+						"binding" : {
+							"type" : "property",
+							"name" : "camunda:class"
+						}
+					},
+					{
+						"label" : "Operation type",
+						"description" : "Operation to be made",
+						"type" : "Dropdown",
+						"choices" : [ {
+							"name" : "GET List",
+							"value" : "get_list"
+						}, {
+							"name" : "GET",
+							"value" : "get"
+						}, {
+							"name" : "POST",
+							"value" : "post"
+						}, {
+							"name" : "DELETE",
+							"value" : "delete"
+						}  ],
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "operation"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "API Path",
+						"description": "Intersight API path - for example /kubernetes/Clusters",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "path"
+						},
+						"constraints" : {
+							"notEmpty" : true
+						}
+					},
+					{
+						"label" : "Query parameters",
+						"description": "for GETList according to the intersight apidoc, in the format variable1=value&variable2=value2&... ; for GET only $select may be used",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "parameters"
+						}
+					},					
+					{
+						"label" : "MOID",
+						"description": "required for GET, POST(on update) and for DELETE",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "moid"
+						}
+					},
+					{
+						"label" : "Payload",
+						"description": "required for POST",
+						"type" : "Text",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "payload"
+						}
+					},
+					{
+						"label" : "String contained?",
+						"description" : "Check if string is contained in result. Note that the result will be a boolean if this field is not empty",
+						"type" : "String",
+						"binding" : {
+							"type" : "camunda:inputParameter",
+							"name" : "contained"
+						}
+					},
+					{
+						"label" : "Result",
+						"description" : "The process variable to which to assign the execution result to",
+						"type" : "String",
+						"value" : "result",
+						"binding" : {
+							"type" : "camunda:outputParameter",
+							"source" : "${ taskResult }"
+						}
+					} 
+				],
+		"entriesVisible" : {
+				"_all" : true,
+				"implementation" : false,
+				"delegate" : false,
+				"resultVariable" : false,
+				"externalTopic" : false,
+				"configureConnectorLink" : false
+		}
+	}	
 ]
