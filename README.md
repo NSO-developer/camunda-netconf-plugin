@@ -194,6 +194,18 @@ or as json objects, like we are doing with the return object (taskResult), where
 When using JSON objects with properties camunda saves the variable content in different tables/fields which do not have this limitation (BLOB).
 The problem in the case of both field injections and JSON objectsis that the specific templates for the properties pane will no longer work in our web UI workflow management tool and you need to deal with low level variable setting instead of predefined input fields for each type of plugin
 
+# Camunda modeler template file
+
+A template file for Camunda Modeler is also provided under utils/camunda-modeler/resources/element-templates/bpmn_templates.json.
+In order to install it, just copy the camunda-modeler folder under the Camunda Modeler User Data Direcotry, which is :
+
+%APPDATA% on Windows
+
+$XDG_CONFIG_HOME or ~/.config on Linux
+
+~/Library/Application Support on macOS
+
+and restart Camunda Modeler
 
 
 
