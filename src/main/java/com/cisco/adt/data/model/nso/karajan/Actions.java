@@ -1,8 +1,8 @@
 package com.cisco.adt.data.model.nso.karajan;
 
-import javax.xml.bind.annotation.XmlElement;
-
 import com.cisco.adt.data.model.nso.NSOServiceModel;
+
+import jakarta.xml.bind.annotation.XmlElement;
 
 public class Actions extends NSOServiceModel {
 

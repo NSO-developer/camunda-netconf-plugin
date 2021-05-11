@@ -5,10 +5,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.stream.Stream;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +14,10 @@ import com.cisco.stbarth.netconf.anc.NetconfException;
 import com.cisco.stbarth.netconf.anc.NetconfSession;
 import com.cisco.stbarth.netconf.anc.XMLElement;
 import com.cisco.stbarth.netconf.anc.XMLElement.XMLException;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 
 /**
  * Utility methods to perform different operation over netconf using the ANC library
